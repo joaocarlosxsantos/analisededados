@@ -40,7 +40,7 @@
 
 
     <div class="resultadosdasconsultas">
-        <% if (resultados) { %>
+        <% if (resultadosduplicidade) { %>
             <h2>Registros API para exclusão</h2>
             <button onclick="exportTableToCSV('duplicidades.csv')">Exportar para CSV</button>
             <table id="resultadosTable">
@@ -52,11 +52,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% resultados.forEach(resultado => { %>
+                    <% resultadosduplicidade.forEach(resultadoduplicidade => { %>
                         <tr>
-                            <td><%= resultado.id %></td>
-                            <td><%= resultado.refo %></td>
-                            <td><%= resultado.datapagto %></td>
+                            <td><%= resultadoduplicidade.id %></td>
+                            <td><%= resultadoduplicidade.refo %></td>
+                            <td><%= resultadoduplicidade.datapagto %></td>
                         </tr>
                     <% }); %>
                 </tbody>
