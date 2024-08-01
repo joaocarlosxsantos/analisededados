@@ -96,7 +96,8 @@ class APIClient {
 
 app.post('/consultar', async (req, res) => {
     const { data_inicial, data_final, chave_api } = req.body;
-    const apiClient = new APIClient('https://api.conciliadora.com.br/api', { 'Authorization': chave_api });
+    const chaveApiTrimmed = chave_api ? chave_api.trim() : '';
+    const apiClient = new APIClient('https://api.conciliadora.com.br/api', { 'Authorization': chaveApiTrimmed });
 
     try {
         const pagamentosedi = await apiClient.getPagamentosEDI(data_inicial, data_final);
