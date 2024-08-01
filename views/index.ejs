@@ -63,7 +63,7 @@
             </table>
         <% } %>
 
-        <% if (resultados) { %>
+        <% if (resultadosvalores) { %>
             <h2>Resultados</h2>
             <button onclick="exportTableToCSV('resultados.csv')">Exportar para CSV</button>
             <table id="resultadosTable">
@@ -79,15 +79,15 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% resultados.forEach(resultado => { %>
+                    <% resultadosvalores.forEach(resultadovalores => { %>
                         <tr>
-                            <td><%= resultado.Empresa %></td>
-                            <td><%= resultado.DataPagamento %></td>
-                            <td><%= resultado.Nsu %></td>
-                            <td><%= resultado.Autorizacao %></td>
-                            <td><%= resultado.ValorBruto %></td>
-                            <td><%= resultado.ValorLiquido %></td>
-                            <td><%= resultado.Status %></td>
+                            <td><%= resultadovalores.Empresa %></td>
+                            <td><%= resultadovalores.DataPagamento %></td>
+                            <td><%= resultadovalores.Nsu %></td>
+                            <td><%= resultadovalores.Autorizacao %></td>
+                            <td><%= resultadovalores.ValorBruto %></td>
+                            <td><%= resultadovalores.ValorLiquido %></td>
+                            <td><%= resultadovalores.Status %></td>
                         </tr>
                     <% }); %>
                 </tbody>

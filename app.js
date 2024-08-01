@@ -16,8 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Rota principal
 app.get('/', (req, res) => {
-    res.render('index', { resultadosduplicidade: null });
-    res.render('index', { resultados: null });
+    res.render('index', { resultadosvalores: null, resultadosduplicidade: null });
 });
 
 class APIClient {
@@ -78,15 +77,14 @@ class APIClient {
         const params = {
             '$filter': `DataPagamento ge ${data_inicial}T00:00:00-03:00 and DataPagamento le ${data_final}T23:59:59-03:00 and AdqId eq 2 and Nsu ne null`
         };
-    
+
         try {
-            // Supondo que this._get é uma função assíncrona, use await para aguardar sua execução
             const consulta = await this._get('ConsultaPagamento', params);
             console.log(consulta);
             return consulta;
         } catch (error) {
             console.error('Erro ao obter pagamentos:', error);
-            throw error;  // Re-throw the error so it can be handled by the caller
+            throw error;
         }
     }
 
@@ -99,12 +97,11 @@ class APIClient {
         return api_valores.value.map(element => {
             const nsu = element['Nsu'];
             const resumovenda = element['ResumoVenda'];
-            
-            if (nsu === null){
+
+            if (nsu === null) {
                 return resumovenda;
             }
         });
-
     }
 
     static tratarPagamentosapi(api_valores, listaronulo) {
@@ -112,7 +109,7 @@ class APIClient {
             console.log("Nenhum pagamento foi retornado ou ocorreu um erro na consulta.");
             return [];
         }
-    
+
         return api_valores.value
             .filter(element => listaronulo.includes(element['ResumoVenda']))
             .map(element => {
@@ -134,11 +131,11 @@ app.post('/consultarduplicidade', async (req, res) => {
         const pagamentosedi = await apiClient.getPagamentosEDI(data_inicial, data_final);
         const resultadosprimeiro = APIClient.tratarPagamentosedi(pagamentosedi);
         const pagamentosapi = await apiClient.getPagamentosAPI(data_inicial, data_final);
-        const resultadosduplicidade = APIClient.tratarPagamentosapi(pagamentosapi,resultadosprimeiro);
-        res.render('index', { resultadosduplicidade });
+        const resultadosduplicidade = APIClient.tratarPagamentosapi(pagamentosapi, resultadosprimeiro);
+        res.render('index', { resultadosduplicidade, resultados: null });
     } catch (error) {
-        res.render('index', { resultadosduplicidade: [] });
-        console.log("erro")
+        res.render('index', { resultadosduplicidade: [], resultados: null });
+        console.log("erro");
     }
 });
 
@@ -149,11 +146,11 @@ app.post('/analisar', async (req, res) => {
 
     try {
         const pagamentos = await apiClient.getPagamentos(data_inicial, data_final);
-        const resultados = APIClient.tratarPagamentos(pagamentos);
-        res.render('index', { resultados });
+        const resultadosvalores = APIClient.tratarPagamentos(pagamentos);
+        res.render('index', { resultadosvalores, resultadosduplicidade: null });
     } catch (error) {
-        res.render('index', { resultados: [] });
-        console.log("erro")
+        res.render('index', { resultadosvalores: [], resultadosduplicidade: null });
+        console.log("erro");
     }
 });
 
