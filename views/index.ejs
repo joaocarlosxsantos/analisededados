@@ -25,7 +25,7 @@
                     <input type="text" id="chave_api" name="chave_api">
                 </div>
                 <button type="button" onclick="submitForm('consultarduplicidade')">Consultar Duplicidade</button>
-                <button type="button" onclick="submitForm('analisar')">Analisar</button>
+                <button type="button" onclick="submitForm('analisar')">Consultar Valores Incorretos</button>
             </form>
         </div>
     </div>
@@ -40,7 +40,7 @@
 
 
     <div class="resultadosdasconsultas">
-        <% if (resultados) { %>
+        <% if (resultadosduplicidades) { %>
             <h2>Registros API para exclusão</h2>
             <button onclick="exportTableToCSV('duplicidades.csv')">Exportar para CSV</button>
             <table id="resultadosTable">
@@ -63,7 +63,7 @@
             </table>
         <% } %>
 
-        <% if (resultados) { %>
+        <% if (resultadosvaloresincorretos) { %>
             <h2>Resultados</h2>
             <button onclick="exportTableToCSV('resultados.csv')">Exportar para CSV</button>
             <table id="resultadosTable">

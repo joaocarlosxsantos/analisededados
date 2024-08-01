@@ -133,10 +133,10 @@ app.post('/consultarduplicidade', async (req, res) => {
         const pagamentosedi = await apiClient.getPagamentosEDI(data_inicial, data_final);
         const resultadosprimeiro = APIClient.tratarPagamentosedi(pagamentosedi);
         const pagamentosapi = await apiClient.getPagamentosAPI(data_inicial, data_final);
-        const resultados = APIClient.tratarPagamentosapi(pagamentosapi,resultadosprimeiro);
-        res.render('index', { resultados });
+        const resultadosduplicidades = APIClient.tratarPagamentosapi(pagamentosapi,resultadosprimeiro);
+        res.render('index', { resultadosduplicidades });
     } catch (error) {
-        res.render('index', { resultados: [] });
+        res.render('index', { resultadosduplicidades: [] });
         console.log("erro")
     }
 });
@@ -148,10 +148,10 @@ app.post('/analisar', async (req, res) => {
 
     try {
         const pagamentos = await apiClient.getPagamentos(data_inicial, data_final);
-        const resultados = APIClient.tratarPagamentos(pagamentos);
-        res.render('index', { resultados });
+        const resultadosvaloresincorretos = APIClient.tratarPagamentos(pagamentos);
+        res.render('index', { resultadosvaloresincorretos });
     } catch (error) {
-        res.render('index', { resultados: [] });
+        res.render('index', { resultadosvaloresincorretos: [] });
         console.log("erro")
     }
 });
