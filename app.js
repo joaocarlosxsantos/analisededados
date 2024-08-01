@@ -52,7 +52,27 @@ class APIClient {
         return api_valores.value.map(element => {
             const valorb = element['ValorBruto'];
             const valorl = element['ValorLiquido'];
-            const status = valorb < valorl && valorb > 0 ? "Atenção" : "Correto";
+            const cod_adq = element['AdqId'];
+            const datavenda = element['DataVenda'];
+            const datapagamento = element['DataPagamento'];
+            const produto = element['Produto'];
+            const aut = element['Autorizacao'];
+            const nsu = element['Nsu'];
+            const ro = element['ResumoVenda'];
+            const estabelecimento = element['Estabelecimento'];
+            const refoid = element['RefoId'];
+            const id_registro = element['Id'];
+            let status = ""
+            
+        
+            switch (valorb,valorl,cod_adq,datavenda,datapagamento,produto,aut,nsu,ro,estabelecimento,refoid,id_registro){
+
+                case valorb < valorl && valorb > 0:
+                    status = "Valor bruto maior que liquido"
+                    break;
+                default:
+                    status = "Correto"
+            }
 
             return {
                 Empresa: element['Empresa'],
