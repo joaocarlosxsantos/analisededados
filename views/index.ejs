@@ -11,42 +11,33 @@
     <div class="form-container">
         <div class="form-wrapper">
             <h2>Consulta de Duplicidade</h2>
-            <form action="/consultarduplicidade" method="post">
+            <form id="multiActionForm">
                 <div class="form-group">
-                    <label for="data_inicial_duplicidade">Data Inicial:</label>
-                    <input type="date" id="data_inicial_duplicidade" name="data_inicial">
+                    <label for="data_inicial">Data Inicial:</label>
+                    <input type="date" id="data_inicial" name="data_inicial">
                 </div>
                 <div class="form-group">
-                    <label for="data_final_duplicidade">Data Final:</label>
-                    <input type="date" id="data_final_duplicidade" name="data_final">
+                    <label for="data_final">Data Final:</label>
+                    <input type="date" id="data_final" name="data_final">
                 </div>
                 <div class="form-group">
-                    <label for="chave_api_duplicidade">Chave API:</label>
-                    <input type="text" id="chave_api_duplicidade" name="chave_api">
+                    <label for="chave_api">Chave API:</label>
+                    <input type="text" id="chave_api" name="chave_api">
                 </div>
-                <button type="submit">Consultar</button>
-            </form>
-        </div>
-
-        <div class="form-wrapper">
-            <h2>Análise de Resultados</h2>
-            <form action="/analisar" method="post">
-                <div class="form-group">
-                    <label for="data_inicial_analise">Data Inicial:</label>
-                    <input type="date" id="data_inicial_analise" name="data_inicial">
-                </div>
-                <div class="form-group">
-                    <label for="data_final_analise">Data Final:</label>
-                    <input type="date" id="data_final_analise" name="data_final">
-                </div>
-                <div class="form-group">
-                    <label for="chave_api_analise">Chave API:</label>
-                    <input type="text" id="chave_api_analise" name="chave_api">
-                </div>
-                <button type="submit">Consultar</button>
+                <button type="button" onclick="submitForm('/consultarduplicidade')">Consultar Duplicidade</button>
+                <button type="button" onclick="submitForm('/analisar')">Analisar</button>
             </form>
         </div>
     </div>
+        <script>
+            function submitForm(action) {
+                const form = document.getElementById('multiActionForm');
+                form.action = `/${action}`;
+                form.method = 'post';
+                form.submit();
+            }
+        </script>
+
 
     <div class="resultadosdasconsultas">
         <% if (resultados) { %>
