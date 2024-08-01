@@ -16,6 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Rota principal
 app.get('/', (req, res) => {
+    res.render('index', { resultadosduplicidade: null });
     res.render('index', { resultados: null });
 });
 
