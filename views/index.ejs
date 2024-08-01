@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Resultados</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <h1>Análise de Resultados</h1>
+    <form action="/consultar" method="post">
+        <div>
+            <label for="data_inicial">Data Inicial:</label>
+            <input type="date" id="data_inicial" name="data_inicial" required>
+        </div>
+        <div>
+            <label for="data_final">Data Final:</label>
+            <input type="date" id="data_final" name="data_final" required>
+        </div>
+        <div>
+            <label for="chave_api">Chave API:</label>
+            <input type="text" id="chave_api" name="chave_api" required>
+        </div>
+        <button type="submit">Consultar</button>
+    </form>
+
+    <% if (resultados) { %>
+        <h2>Resultados</h2>
+        <button onclick="exportTableToCSV('resultados.csv')">Exportar para CSV</button>
+        <table id="resultadosTable">
+            <thead>
+                <tr>
+                    <th>Empresa</th>
+                    <th>Data Pagamento</th>
+                    <th>NSU</th>
+                    <th>Autorização</th>
+                    <th>Valor Bruto</th>
+                    <th>Valor Líquido</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% resultados.forEach(resultado => { %>
+                    <tr>
+                        <td><%= resultado.Empresa %></td>
+                        <td><%= resultado.DataPagamento %></td>
+                        <td><%= resultado.Nsu %></td>
+                        <td><%= resultado.Autorizacao %></td>
+                        <td><%= resultado.ValorBruto %></td>
+                        <td><%= resultado.ValorLiquido %></td>
+                        <td><%= resultado.Status %></td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    <% } %>
+
+    <script>
+        function downloadCSV(csv, filename) {
+            const csvFile = new Blob([csv], { type: 'text/csv' });
+            const downloadLink = document.createElement('a');
+            downloadLink.download = filename;
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+            downloadLink.style.display = 'none';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+        }
+
+        function exportTableToCSV(filename) {
+            const csv = [];
+            const rows = document.querySelectorAll('table tr');
+            
+            for (const row of rows) {
+                const cols = row.querySelectorAll('td, th');
+                const rowCsv = [];
+                for (const col of cols) {
+                    rowCsv.push(col.innerText);
+                }
+                csv.push(rowCsv.join(','));
+            }
+
+            downloadCSV(csv.join('\n'), filename);
+        }
+    </script>
+</body>
+</html>
