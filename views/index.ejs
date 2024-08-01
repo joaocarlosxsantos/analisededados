@@ -52,11 +52,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% resultadosduplicidades.forEach(resultado => { %>
+                    <% resultadosduplicidades.forEach(resultadosduplicidade => { %>
                         <tr>
-                            <td><%= resultado.id %></td>
-                            <td><%= resultado.refo %></td>
-                            <td><%= resultado.datapagto %></td>
+                            <td><%= resultadosduplicidade.id %></td>
+                            <td><%= resultadosduplicidade.refo %></td>
+                            <td><%= resultadosduplicidade.datapagto %></td>
                         </tr>
                     <% }); %>
                 </tbody>
@@ -79,15 +79,15 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% resultadosvaloresincorretos.forEach(resultado => { %>
+                    <% resultadosvaloresincorretos.forEach(resultadosvalorincorreto => { %>
                         <tr>
-                            <td><%= resultado.Empresa %></td>
-                            <td><%= resultado.DataPagamento %></td>
-                            <td><%= resultado.Nsu %></td>
-                            <td><%= resultado.Autorizacao %></td>
-                            <td><%= resultado.ValorBruto %></td>
-                            <td><%= resultado.ValorLiquido %></td>
-                            <td><%= resultado.Status %></td>
+                            <td><%= resultadosvalorincorreto.Empresa %></td>
+                            <td><%= resultadosvalorincorreto.DataPagamento %></td>
+                            <td><%= resultadosvalorincorreto.Nsu %></td>
+                            <td><%= resultadosvalorincorreto.Autorizacao %></td>
+                            <td><%= resultadosvalorincorreto.ValorBruto %></td>
+                            <td><%= resultadosvalorincorreto.ValorLiquido %></td>
+                            <td><%= resultadosvalorincorreto.Status %></td>
                         </tr>
                     <% }); %>
                 </tbody>
