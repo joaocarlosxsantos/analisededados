@@ -29,15 +29,6 @@
             </form>
         </div>
     </div>
-        <script>
-            function submitForm(action) {
-                const form = document.getElementById('multiActionForm');
-                form.action = `/${action}`;
-                form.method = 'post';
-                form.submit();
-            }
-        </script>
-
 
     <div class="resultadosdasconsultas">
         <% if (resultadosduplicidade) { %>
@@ -95,6 +86,13 @@
         <% } %>
     </div>
     <script>
+        function submitForm(action) {
+            const form = document.getElementById('multiActionForm');
+            form.action = `/${action}`;
+            form.method = 'post';
+            form.submit();
+        }
+
         function downloadCSV(csv, filename) {
             const csvFile = new Blob([csv], { type: 'text/csv' });
             const downloadLink = document.createElement('a');
