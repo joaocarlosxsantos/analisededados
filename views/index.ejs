@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Análise de Resultados</title>
+    <title>Duplicidades</title>
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-    <h1>Análise de Resultados</h1>
+    <h1>Duplicidade Rede API X EDI</h1>
     <form action="/consultar" method="post">
         <div>
             <label for="data_inicial">Data Inicial:</label>
@@ -30,25 +30,17 @@
         <table id="resultadosTable">
             <thead>
                 <tr>
-                    <th>Empresa</th>
+                    <th>ID</th>
+                    <th>REFO</th>
                     <th>Data Pagamento</th>
-                    <th>NSU</th>
-                    <th>Autorização</th>
-                    <th>Valor Bruto</th>
-                    <th>Valor Líquido</th>
-                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
                 <% resultados.forEach(resultado => { %>
                     <tr>
-                        <td><%= resultado.Empresa %></td>
+                        <td><%= resultado.ID %></td>
+                        <td><%= resultado.REFO %></td>
                         <td><%= resultado.DataPagamento %></td>
-                        <td><%= resultado.Nsu %></td>
-                        <td><%= resultado.Autorizacao %></td>
-                        <td><%= resultado.ValorBruto %></td>
-                        <td><%= resultado.ValorLiquido %></td>
-                        <td><%= resultado.Status %></td>
                     </tr>
                 <% }); %>
             </tbody>

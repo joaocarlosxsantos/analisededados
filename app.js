@@ -36,35 +36,74 @@ class APIClient {
         }
     }
 
-    async getPagamentos(data_inicial, data_final) {
+    async getPagamentosEDI(data_inicial, data_final) {
         const params = {
-            '$filter': `DataPagamento ge ${data_inicial}T00:00:00-03:00 and DataPagamento le ${data_final}T23:59:59-03:00`
+            '$filter': `DataPagamento ge ${data_inicial}T00:00:00-03:00 and DataPagamento le ${data_final}T23:59:59-03:00 and AdqId eq 2 and Nsu eq null`
         };
         return this._get('ConsultaPagamento', params);
     }
 
-    static tratarPagamentos(api_valores) {
+    async getPagamentosAPI(data_inicial, data_final,listaronulo) {
+
+        const incrimentoconsulta = "";
+        for (let i = 0; i < listaronulo.length; i++) {
+            if (i = 0){
+                incrimentoconsulta = "ResumoVenda eq '"+lista[i]+"'";
+            }
+            incrimentoconsulta = " or ResumoVenda eq '"+lista[i]+"'";
+                
+          }
+        
+        const params = {
+            '$filter': `DataPagamento ge ${data_inicial}T00:00:00-03:00 and DataPagamento le ${data_final}T23:59:59-03:00 and AdqId eq 2 and Nsu ne null and ${incrimentoconsulta}`
+        };
+        return this._get('ConsultaPagamento', params);
+    }
+
+    static tratarPagamentosedi(api_valores) {
+
+        const listaronulo = [];
+
         if (!api_valores || !api_valores.value) {
             console.log("Nenhum pagamento foi retornado ou ocorreu um erro na consulta.");
             return [];
         }
 
         return api_valores.value.map(element => {
-            const valorb = element['ValorBruto'];
-            const valorl = element['ValorLiquido'];
-            const status = valorb < valorl && valorb > 0 ? "Atenção" : "Correto";
+            const nsu = element['Nsu'];
+            const resumovenda = element['ResumoVenda'];
+            
+            if (nsu = null){
+                listaronulo.push(resumovenda);
+            }
+            return listaronulo;
+        });
+
+    }
+
+    static tratarPagamentosapi(api_valores) {
+
+        const listaronulo = [];
+
+        if (!api_valores || !api_valores.value) {
+            console.log("Nenhum pagamento foi retornado ou ocorreu um erro na consulta.");
+            return [];
+        }
+
+        return api_valores.value.map(element => {
+            const id = element['Id'];
+            const refo = element['RefoId'];
+            const datapgamento = element['DataPagamento'];
 
             return {
-                Empresa: element['Empresa'],
-                DataPagamento: element['DataPagamento'],
-                Nsu: element['Nsu'],
-                Autorizacao: element['Autorizacao'],
-                ValorBruto: valorb,
-                ValorLiquido: valorl,
-                Status: status
+                ID: id,
+                REFO : refo,
+                DataPagamento: datapgamento
             };
         });
+
     }
+
 }
 
 app.post('/consultar', async (req, res) => {
@@ -72,8 +111,10 @@ app.post('/consultar', async (req, res) => {
     const apiClient = new APIClient('https://api.conciliadora.com.br/api', { 'Authorization': chave_api });
 
     try {
-        const pagamentos = await apiClient.getPagamentos(data_inicial, data_final);
-        const resultados = APIClient.tratarPagamentos(pagamentos);
+        const pagamentosedi = await apiClient.getPagamentosEDI(data_inicial, data_final);
+        const resultadosprimeiro = APIClient.tratarPagamentosedi(pagamentosedi);
+        const pagamentosapi = await apiClient.getPagamentosEDI(data_inicial, data_final,resultadosprimeiro);
+        const resultados = APIClient.tratarPagamentosapi(pagamentosapi);
         res.render('index', { resultados });
     } catch (error) {
         res.render('index', { resultados: [] });
