@@ -48,29 +48,61 @@
         </div>
     </div>
 
-    <% if (resultados) { %>
-        <h2>Registros API para exclusão</h2>
-        <button onclick="exportTableToCSV('duplicidades.csv')">Exportar para CSV</button>
-        <table id="resultadosTable">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>REFO</th>
-                    <th>Data Pagamento</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% resultados.forEach(resultado => { %>
+    <div class="resultadosdasconsultas">
+        <% if (resultados) { %>
+            <h2>Registros API para exclusão</h2>
+            <button onclick="exportTableToCSV('duplicidades.csv')">Exportar para CSV</button>
+            <table id="resultadosTable">
+                <thead>
                     <tr>
-                        <td><%= resultado.id %></td>
-                        <td><%= resultado.refo %></td>
-                        <td><%= resultado.datapagto %></td>
+                        <th>ID</th>
+                        <th>REFO</th>
+                        <th>Data Pagamento</th>
                     </tr>
-                <% }); %>
-            </tbody>
-        </table>
-    <% } %>
+                </thead>
+                <tbody>
+                    <% resultados.forEach(resultado => { %>
+                        <tr>
+                            <td><%= resultado.id %></td>
+                            <td><%= resultado.refo %></td>
+                            <td><%= resultado.datapagto %></td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        <% } %>
 
+        <% if (resultados) { %>
+            <h2>Resultados</h2>
+            <button onclick="exportTableToCSV('resultados.csv')">Exportar para CSV</button>
+            <table id="resultadosTable">
+                <thead>
+                    <tr>
+                        <th>Empresa</th>
+                        <th>Data Pagamento</th>
+                        <th>NSU</th>
+                        <th>Autorização</th>
+                        <th>Valor Bruto</th>
+                        <th>Valor Líquido</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% resultados.forEach(resultado => { %>
+                        <tr>
+                            <td><%= resultado.Empresa %></td>
+                            <td><%= resultado.DataPagamento %></td>
+                            <td><%= resultado.Nsu %></td>
+                            <td><%= resultado.Autorizacao %></td>
+                            <td><%= resultado.ValorBruto %></td>
+                            <td><%= resultado.ValorLiquido %></td>
+                            <td><%= resultado.Status %></td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        <% } %>
+    </div>
     <script>
         function downloadCSV(csv, filename) {
             const csvFile = new Blob([csv], { type: 'text/csv' });

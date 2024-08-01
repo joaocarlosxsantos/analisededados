@@ -7,7 +7,6 @@ body {
     padding: 0;
     display: flex;
     flex-direction: column;
-    align-items: center;
 }
 
 /* Cabeçalho */
@@ -47,6 +46,17 @@ h1 {
 /* Estilo dos labels e inputs */
 .form-group {
     margin-bottom: 15px;
+}
+
+.resultadosdasconsultas {
+    font-family: Arial, sans-serif;
+    background-color: #f7f9fc;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 label {
