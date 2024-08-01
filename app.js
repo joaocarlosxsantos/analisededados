@@ -132,9 +132,9 @@ app.post('/consultarduplicidade', async (req, res) => {
         const resultadosprimeiro = APIClient.tratarPagamentosedi(pagamentosedi);
         const pagamentosapi = await apiClient.getPagamentosAPI(data_inicial, data_final);
         const resultadosduplicidade = APIClient.tratarPagamentosapi(pagamentosapi, resultadosprimeiro);
-        res.render('index', { resultadosduplicidade, resultados: null });
+        res.render('index', { resultadosduplicidade, resultadosvalores: null });
     } catch (error) {
-        res.render('index', { resultadosduplicidade: [], resultados: null });
+        res.render('index', { resultadosduplicidade: [], resultadosvalores: null });
         console.log("erro");
     }
 });
