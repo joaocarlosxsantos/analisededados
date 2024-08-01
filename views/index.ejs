@@ -11,15 +11,15 @@
     <form action="/consultar" method="post">
         <div>
             <label for="data_inicial">Data Inicial:</label>
-            <input type="date" id="data_inicial" name="data_inicial" required>
+            <input type="date" id="data_inicial" name="data_inicial" >
         </div>
         <div>
             <label for="data_final">Data Final:</label>
-            <input type="date" id="data_final" name="data_final" required>
+            <input type="date" id="data_final" name="data_final" >
         </div>
         <div>
             <label for="chave_api">Chave API:</label>
-            <input type="text" id="chave_api" name="chave_api" required>
+            <input type="text" id="chave_api" name="chave_api" >
         </div>
         <button type="submit">Consultar</button>
     </form>
@@ -38,9 +38,9 @@
             <tbody>
                 <% resultados.forEach(resultado => { %>
                     <tr>
-                        <td><%= resultado.ID %></td>
-                        <td><%= resultado.REFO %></td>
-                        <td><%= resultado.DataPagamento %></td>
+                        <td><%= resultado.id %></td>
+                        <td><%= resultado.refo %></td>
+                        <td><%= resultado.datapagto %></td>
                     </tr>
                 <% }); %>
             </tbody>

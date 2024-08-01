@@ -28,7 +28,7 @@ class APIClient {
     async _get(endpoint, params) {
         const url = `${this.base_url}/${endpoint}`;
         try {
-            const response = await axios.get(url, { headers: this.headers, params, timeout: 15000 });
+            const response = await axios.get(url, { headers: this.headers, params, timeout: 150000 });
             return response.data;
         } catch (error) {
             console.error(`Erro: ${error.message}`);
@@ -43,27 +43,23 @@ class APIClient {
         return this._get('ConsultaPagamento', params);
     }
 
-    async getPagamentosAPI(data_inicial, data_final,listaronulo) {
-
-        const incrimentoconsulta = "";
-        for (let i = 0; i < listaronulo.length; i++) {
-            if (i = 0){
-                incrimentoconsulta = "ResumoVenda eq '"+lista[i]+"'";
-            }
-            incrimentoconsulta = " or ResumoVenda eq '"+lista[i]+"'";
-                
-          }
-        
+    async getPagamentosAPI(data_inicial, data_final) {
         const params = {
-            '$filter': `DataPagamento ge ${data_inicial}T00:00:00-03:00 and DataPagamento le ${data_final}T23:59:59-03:00 and AdqId eq 2 and Nsu ne null and ${incrimentoconsulta}`
+            '$filter': `DataPagamento ge ${data_inicial}T00:00:00-03:00 and DataPagamento le ${data_final}T23:59:59-03:00 and AdqId eq 2 and Nsu ne null`
         };
-        return this._get('ConsultaPagamento', params);
+    
+        try {
+            // Supondo que this._get é uma função assíncrona, use await para aguardar sua execução
+            const consulta = await this._get('ConsultaPagamento', params);
+            console.log(consulta);
+            return consulta;
+        } catch (error) {
+            console.error('Erro ao obter pagamentos:', error);
+            throw error;  // Re-throw the error so it can be handled by the caller
+        }
     }
 
     static tratarPagamentosedi(api_valores) {
-
-        const listaronulo = [];
-
         if (!api_valores || !api_valores.value) {
             console.log("Nenhum pagamento foi retornado ou ocorreu um erro na consulta.");
             return [];
@@ -73,37 +69,29 @@ class APIClient {
             const nsu = element['Nsu'];
             const resumovenda = element['ResumoVenda'];
             
-            if (nsu = null){
-                listaronulo.push(resumovenda);
+            if (nsu === null){
+                return resumovenda;
             }
-            return listaronulo;
         });
 
     }
 
-    static tratarPagamentosapi(api_valores) {
-
-        const listaronulo = [];
-
+    static tratarPagamentosapi(api_valores, listaronulo) {
         if (!api_valores || !api_valores.value) {
             console.log("Nenhum pagamento foi retornado ou ocorreu um erro na consulta.");
             return [];
         }
-
-        return api_valores.value.map(element => {
-            const id = element['Id'];
-            const refo = element['RefoId'];
-            const datapgamento = element['DataPagamento'];
-
-            return {
-                ID: id,
-                REFO : refo,
-                DataPagamento: datapgamento
-            };
-        });
-
+    
+        return api_valores.value
+            .filter(element => listaronulo.includes(element['ResumoVenda']))
+            .map(element => {
+                return {
+                    id: element['Id'],
+                    refo: element['RefoId'],
+                    datapagto: element['DataPagamento']
+                };
+            });
     }
-
 }
 
 app.post('/consultar', async (req, res) => {
@@ -113,11 +101,12 @@ app.post('/consultar', async (req, res) => {
     try {
         const pagamentosedi = await apiClient.getPagamentosEDI(data_inicial, data_final);
         const resultadosprimeiro = APIClient.tratarPagamentosedi(pagamentosedi);
-        const pagamentosapi = await apiClient.getPagamentosEDI(data_inicial, data_final,resultadosprimeiro);
-        const resultados = APIClient.tratarPagamentosapi(pagamentosapi);
+        const pagamentosapi = await apiClient.getPagamentosAPI(data_inicial, data_final);
+        const resultados = APIClient.tratarPagamentosapi(pagamentosapi,resultadosprimeiro);
         res.render('index', { resultados });
     } catch (error) {
         res.render('index', { resultados: [] });
+        console.log("erro")
     }
 });
 
