@@ -91,13 +91,24 @@
             const form = document.getElementById('multiActionForm');
             form.action = `/${action}`;
             form.method = 'post';
+
+            // Armazenar os valores do formulário em localStorage
+            const data_inicial = document.getElementById('data_inicial').value;
+            const data_final = document.getElementById('data_final').value;
+            const chave_api = (document.getElementById('chave_api').value).trim() ;
+
+            localStorage.setItem('data_inicial', data_inicial);
+            localStorage.setItem('data_final', data_final);
+            localStorage.setItem('chave_api', chave_api);
+
             form.submit();
         }
 
         function getFormData() {
-            const data_inicial = document.getElementById('data_inicial').value;
-            const data_final = document.getElementById('data_final').value;
-            const chave_api = document.getElementById('chave_api').value;
+            // Recuperar os valores do localStorage
+            const data_inicial = localStorage.getItem('data_inicial');
+            const data_final = localStorage.getItem('data_final');
+            const chave_api = localStorage.getItem('chave_api');
             return { data_inicial, data_final, chave_api };
         }
 
