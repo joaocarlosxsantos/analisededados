@@ -33,8 +33,8 @@
     <div class="resultadosdasconsultas">
         <% if (resultadosduplicidade) { %>
             <h2>Registros API para exclusão</h2>
-            <button onclick="exportTableToCSV('duplicidades.csv')">Exportar para CSV</button>
-            <table id="resultadosTable">
+            <button onclick="exportTableToCSV('duplicidades')">Exportar para CSV</button>
+            <table id="resultadosTableDuplicidades">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -56,8 +56,8 @@
 
         <% if (resultadosvalores) { %>
             <h2>Resultados</h2>
-            <button onclick="exportTableToCSV('resultados.csv')">Exportar para CSV</button>
-            <table id="resultadosTable">
+            <button onclick="exportTableToCSV('valores')">Exportar para CSV</button>
+            <table id="resultadosTableValores">
                 <thead>
                     <tr>
                         <th>Empresa</th>
@@ -85,12 +85,20 @@
             </table>
         <% } %>
     </div>
+
     <script>
         function submitForm(action) {
             const form = document.getElementById('multiActionForm');
             form.action = `/${action}`;
             form.method = 'post';
             form.submit();
+        }
+
+        function getFormData() {
+            const data_inicial = document.getElementById('data_inicial').value;
+            const data_final = document.getElementById('data_final').value;
+            const chave_api = document.getElementById('chave_api').value;
+            return { data_inicial, data_final, chave_api };
         }
 
         function downloadCSV(csv, filename) {
@@ -101,12 +109,26 @@
             downloadLink.style.display = 'none';
             document.body.appendChild(downloadLink);
             downloadLink.click();
+            document.body.removeChild(downloadLink);
         }
 
-        function exportTableToCSV(filename) {
+        function exportTableToCSV(type) {
+            const formData = getFormData();
+            const filename = `${type}_${formData.data_inicial}_${formData.data_final}_${formData.chave_api}.csv`;
+
+            let tableId = '';
+            if (type === 'duplicidades') {
+                tableId = 'resultadosTableDuplicidades';
+            } else if (type === 'valores') {
+                tableId = 'resultadosTableValores';
+            }
+
+            const table = document.getElementById(tableId);
+            if (!table) return;
+
             const csv = [];
-            const rows = document.querySelectorAll('table tr');
-            
+            const rows = table.querySelectorAll('tr');
+
             for (const row of rows) {
                 const cols = row.querySelectorAll('td, th');
                 const rowCsv = [];
