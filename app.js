@@ -48,43 +48,41 @@ class APIClient {
             console.log("Nenhum pagamento foi retornado ou ocorreu um erro na consulta.");
             return [];
         }
-
-        return api_valores.value.map(element => {
-            const valorb = element['ValorBruto'];
-            const valorl = element['ValorLiquido'];
-            const cod_adq = element['AdqId'];
-            const datavenda = element['DataVenda'];
-            const datapagamento = element['DataPagamento'];
-            const produto = element['Produto'];
-            const aut = element['Autorizacao'];
-            const nsu = element['Nsu'];
-            const ro = element['ResumoVenda'];
-            const estabelecimento = element['Estabelecimento'];
-            const refoid = element['RefoId'];
-            const id_registro = element['Id'];
-            let status = ""
-            
-        
-            switch (valorb,valorl,cod_adq,datavenda,datapagamento,produto,aut,nsu,ro,estabelecimento,refoid,id_registro){
-
-                case valorb < valorl && valorb > 0:
-                    status = "Valor bruto maior que liquido"
-                    break;
-                default:
-                    status = "Correto"
-            }
-
-            return {
-                Empresa: element['Empresa'],
-                DataPagamento: element['DataPagamento'],
-                Nsu: element['Nsu'],
-                Autorizacao: element['Autorizacao'],
-                ValorBruto: valorb,
-                ValorLiquido: valorl,
-                Status: status
-            };
-        });
+    
+        return api_valores.value
+            .filter(element => {
+                const valorb = element['ValorBruto'];
+                const valorl = element['ValorLiquido'];
+                return valorb < valorl && valorb > 0;
+            })
+            .map(element => {
+                const valorb = element['ValorBruto'];
+                const valorl = element['ValorLiquido'];
+                const cod_adq = element['AdqId'];
+                const datavenda = element['DataVenda'];
+                const datapagamento = element['DataPagamento'];
+                const produto = element['Produto'];
+                const aut = element['Autorizacao'];
+                const nsu = element['Nsu'];
+                const ro = element['ResumoVenda'];
+                const estabelecimento = element['Estabelecimento'];
+                const refoid = element['RefoId'];
+                const id_registro = element['Id'];
+                let status = "Líquido>Bruto";
+                
+                return {
+                    Empresa: element['Empresa'],
+                    DataPagamento: datapagamento,
+                    DataVenda: datavenda,
+                    Nsu: nsu,
+                    Autorizacao: aut,
+                    ValorBruto: valorb,
+                    ValorLiquido: valorl,
+                    Status: status
+                };
+            });
     }
+    
 
     async getPagamentosEDI(data_inicial, data_final) {
         const params = {
