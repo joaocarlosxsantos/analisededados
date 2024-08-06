@@ -71,6 +71,7 @@ class APIClient {
                 let status = "Líquido>Bruto";
                 
                 return {
+                    RefoID : refoid,
                     Empresa: element['Empresa'],
                     DataPagamento: datapagamento,
                     DataVenda: datavenda,

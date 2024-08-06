@@ -60,6 +60,7 @@
             <table id="resultadosTableValores">
                 <thead>
                     <tr>
+                        <th>RefoID</th>
                         <th>Empresa</th>
                         <th>Data Pagamento</th>
                         <th>Data Venda</th>
@@ -74,6 +75,7 @@
                     <% resultadosvalores.forEach(resultadovalores => { %>
                         <tr>
                             <td><%= resultadovalores.Empresa %></td>
+                            <td><%= resultadovalores.RefoID %></td>
                             <td><%= resultadovalores.DataPagamento %></td>
                             <td><%= resultadovalores.DataVenda %></td>
                             <td><%= resultadovalores.Nsu %></td>
