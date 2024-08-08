@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const path = require('path');
+const timeout = require('connect-timeout'); // Adicionar o pacote de timeout
 
 const app = express();
 const port = 3000;
@@ -13,6 +14,12 @@ app.set('views', path.join(__dirname, 'views'));
 // Middleware para servir arquivos estáticos e processar o corpo das requisições
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(timeout('120s')); // Define um timeout de 120 segundos
+
+// Middleware para tratar requisições que ultrapassaram o tempo limite
+app.use((req, res, next) => {
+    if (!req.timedout) next();
+});
 
 // Rota principal
 app.get('/', (req, res) => {
@@ -31,8 +38,13 @@ class APIClient {
             const response = await axios.get(url, { headers: this.headers, params, timeout: 150000 });
             return response.data;
         } catch (error) {
-            console.error(`Erro: ${error.message}`);
-            throw error;
+            if (error.code === 'ECONNABORTED') {
+                console.error('Erro: Timeout na requisição.');
+                throw new Error('Timeout na requisição ao servidor externo.');
+            } else {
+                console.error(`Erro: ${error.message}`);
+                throw error;
+            }
         }
     }
 
@@ -58,32 +70,21 @@ class APIClient {
             .map(element => {
                 const valorb = element['ValorBruto'];
                 const valorl = element['ValorLiquido'];
-                const cod_adq = element['AdqId'];
-                const datavenda = element['DataVenda'];
-                const datapagamento = element['DataPagamento'];
-                const produto = element['Produto'];
-                const aut = element['Autorizacao'];
-                const nsu = element['Nsu'];
-                const ro = element['ResumoVenda'];
-                const estabelecimento = element['Estabelecimento'];
-                const refoid = element['RefoId'];
-                const id_registro = element['Id'];
                 let status = "Líquido>Bruto";
                 
                 return {
-                    RefoID : refoid,
+                    RefoID : element['RefoId'],
                     Empresa: element['Empresa'],
-                    DataPagamento: datapagamento,
-                    DataVenda: datavenda,
-                    Nsu: nsu,
-                    Autorizacao: aut,
+                    DataPagamento: element['DataPagamento'],
+                    DataVenda: element['DataVenda'],
+                    Nsu: element['Nsu'],
+                    Autorizacao: element['Autorizacao'],
                     ValorBruto: valorb,
                     ValorLiquido: valorl,
                     Status: status
                 };
             });
     }
-    
 
     async getPagamentosEDI(data_inicial, data_final) {
         const params = {
@@ -153,8 +154,12 @@ app.post('/consultarduplicidade', async (req, res) => {
         const resultadosduplicidade = APIClient.tratarPagamentosapi(pagamentosapi, resultadosprimeiro);
         res.render('index', { resultadosduplicidade, resultadosvalores: null });
     } catch (error) {
-        res.render('index', { resultadosduplicidade: [], resultadosvalores: null });
-        console.log("erro");
+        if (req.timedout) {
+            res.status(503).send('O servidor está demorando muito para responder. Tente novamente mais tarde.');
+        } else {
+            res.render('index', { resultadosduplicidade: [], resultadosvalores: null });
+            console.log("erro", error.message);
+        }
     }
 });
 
@@ -168,8 +173,12 @@ app.post('/analisar', async (req, res) => {
         const resultadosvalores = APIClient.tratarPagamentos(pagamentos);
         res.render('index', { resultadosvalores, resultadosduplicidade: null });
     } catch (error) {
-        res.render('index', { resultadosvalores: [], resultadosduplicidade: null });
-        console.log("erro");
+        if (req.timedout) {
+            res.status(503).send('O servidor está demorando muito para responder. Tente novamente mais tarde.');
+        } else {
+            res.render('index', { resultadosvalores: [], resultadosduplicidade: null });
+            console.log("erro", error.message);
+        }
     }
 });
 
