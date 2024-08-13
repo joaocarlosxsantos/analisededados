@@ -119,7 +119,7 @@ class APIClient {
             const resumovenda = element['ResumoVenda'];
             const idtipotransacao = element['IdTipoTransacao'];
 
-            if (nsu === null && idtipotransacao !== 6 && idtipotransacao !== 7) {
+            if (nsu === null && idtipotransacao === 1) {
                 return resumovenda;
             }
             
