@@ -100,7 +100,7 @@ class APIClient {
 
         try {
             const consulta = await this._get('ConsultaPagamento', params);
-            console.log(consulta);
+            //console.log(consulta);
             return consulta;
         } catch (error) {
             console.error('Erro ao obter pagamentos:', error);
@@ -117,10 +117,12 @@ class APIClient {
         return api_valores.value.map(element => {
             const nsu = element['Nsu'];
             const resumovenda = element['ResumoVenda'];
+            const idtipotransacao = element['IdTipoTransacao'];
 
-            if (nsu === null) {
+            if (nsu === null && idtipotransacao !== 6 && idtipotransacao !== 7) {
                 return resumovenda;
             }
+            
         });
     }
 
