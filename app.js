@@ -43,6 +43,11 @@ class APIClient {
                 throw new Error('Timeout na requisição ao servidor externo.');
             } else {
                 console.error(`Erro: ${error.message}`);
+                if (error.response) {
+                    // Se a resposta da API estiver disponível
+                    console.error(`Status: ${error.response.status}`);
+                    console.error(`Dados: ${JSON.stringify(error.response.data)}`);
+                }
                 throw error;
             }
         }
@@ -50,10 +55,17 @@ class APIClient {
 
     async getPagamentos(data_inicial, data_final) {
         const params = {
-            '$filter': `DataPagamento ge ${data_inicial}T00:00:00-03:00 and DataPagamento le ${data_final}T23:59:59-03:00&$select=AdqId,RefoId,Empresa,DataPagamento,DataVenda,Nsu,Autorizacao,ResumoVenda,ValorBruto,ValorLiquido`
+            $filter: `DataPagamento ge ${data_inicial}T00:00:00-03:00 and DataPagamento le ${data_final}T23:59:59-03:00`,
+            $select: 'AdqId,RefoId,Empresa,DataPagamento,DataVenda,Nsu,Autorizacao,ResumoVenda,ValorBruto,ValorLiquido'
         };
-        const consultaAPI =  await this._get('ConsultaPagamento', params);
-        return consultaAPI;
+
+        try {
+            const consultaAPI = await this._get('ConsultaPagamento', params);
+            return consultaAPI;
+        } catch (error) {
+            console.error('Erro ao obter pagamentos:', error.message);
+            throw error;
+        }
     }
 
     static getPagamentosEDI(consultaAPI) {
