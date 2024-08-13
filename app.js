@@ -14,7 +14,7 @@ app.set('views', path.join(__dirname, 'views'));
 // Middleware para servir arquivos estáticos e processar o corpo das requisições
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(timeout('120s')); // Define um timeout de 120 segundos
+app.use(timeout('500s')); // Define um timeout de 120 segundos
 
 // Middleware para tratar requisições que ultrapassaram o tempo limite
 app.use((req, res, next) => {
