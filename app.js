@@ -52,9 +52,18 @@ class APIClient {
         const params = {
             '$filter': `DataPagamento ge ${data_inicial}T00:00:00-03:00 and DataPagamento le ${data_final}T23:59:59-03:00`
         };
-        return this._get('ConsultaPagamento', params);
+        const consultaAPI =  await this._get('ConsultaPagamento', params);
+        return consultaAPI;
     }
 
+    static getPagamentosEDI(consultaAPI) {
+        return consultaAPI.filter(item => item.AdqId === 2 && item.Nsu === null);
+    }
+
+    static getPagamentosAPI(consultaAPI) {
+        return consultaAPI.filter(item => item.AdqId === 2 && item.Nsu !== null);
+    }
+    
     static tratarPagamentos(api_valores) {
         if (!api_valores || !api_valores.value) {
             console.log("Nenhum pagamento foi retornado ou ocorreu um erro na consulta.");
@@ -84,28 +93,6 @@ class APIClient {
                     Status: status
                 };
             });
-    }
-
-    async getPagamentosEDI(data_inicial, data_final) {
-        const params = {
-            '$filter': `DataPagamento ge ${data_inicial}T00:00:00-03:00 and DataPagamento le ${data_final}T23:59:59-03:00 and AdqId eq 2 and Nsu eq null`
-        };
-        return this._get('ConsultaPagamento', params);
-    }
-
-    async getPagamentosAPI(data_inicial, data_final) {
-        const params = {
-            '$filter': `DataPagamento ge ${data_inicial}T00:00:00-03:00 and DataPagamento le ${data_final}T23:59:59-03:00 and AdqId eq 2 and Nsu ne null`
-        };
-
-        try {
-            const consulta = await this._get('ConsultaPagamento', params);
-            //console.log(consulta);
-            return consulta;
-        } catch (error) {
-            console.error('Erro ao obter pagamentos:', error);
-            throw error;
-        }
     }
 
     static tratarPagamentosedi(api_valores) {
@@ -150,9 +137,10 @@ app.post('/consultarduplicidade', async (req, res) => {
     const apiClient = new APIClient('https://api.conciliadora.com.br/api', { 'Authorization': chaveApiTrimmed });
 
     try {
-        const pagamentosedi = await apiClient.getPagamentosEDI(data_inicial, data_final);
+        const pagamentos = await apiClient.getPagamentos(data_inicial, data_final);
+        const pagamentosedi = await apiClient.getPagamentosEDI(pagamentos);
         const resultadosprimeiro = APIClient.tratarPagamentosedi(pagamentosedi);
-        const pagamentosapi = await apiClient.getPagamentosAPI(data_inicial, data_final);
+        const pagamentosapi = await apiClient.getPagamentosAPI(consultaAPI);
         const resultadosduplicidade = APIClient.tratarPagamentosapi(pagamentosapi, resultadosprimeiro);
         res.render('index', { resultadosduplicidade, resultadosvalores: null });
     } catch (error) {
