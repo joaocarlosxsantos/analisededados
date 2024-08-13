@@ -50,7 +50,7 @@ class APIClient {
 
     async getPagamentos(data_inicial, data_final) {
         const params = {
-            '$filter': `DataPagamento ge ${data_inicial}T00:00:00-03:00 and DataPagamento le ${data_final}T23:59:59-03:00`
+            '$filter': `DataPagamento ge ${data_inicial}T00:00:00-03:00 and DataPagamento le ${data_final}T23:59:59-03:00&$select=AdqId,RefoId,Empresa,DataPagamento,DataVenda,Nsu,Autorizacao,ResumoVenda,ValorBruto,ValorLiquido`
         };
         const consultaAPI =  await this._get('ConsultaPagamento', params);
         return consultaAPI;
