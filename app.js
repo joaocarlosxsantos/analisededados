@@ -56,7 +56,7 @@ class APIClient {
     async getPagamentos(data_inicial, data_final) {
         const params = {
             $filter: `DataPagamento ge ${data_inicial}T00:00:00-03:00 and DataPagamento le ${data_final}T23:59:59-03:00`,
-            $select: 'AdqId,RefoId,Empresa,DataPagamento,DataVenda,Nsu,Autorizacao,ResumoVenda,ValorBruto,ValorLiquido'
+            $select: 'AdqId,RefoId,Empresa,DataPagamento,DataVenda,Nsu,Autorizacao,ResumoVenda,ValorBruto,ValorLiquido,IdTipoTransacao'
         };
 
         try {
@@ -68,12 +68,12 @@ class APIClient {
         }
     }
 
-    static getPagamentosEDI(consultaAPI) {
-        return consultaAPI.filter(item => item.AdqId === 2 && item.Nsu === null);
+    static redeEDIduplicado(consultaAPI) {
+        return consultaAPI.filter(item => item.AdqId === 2 && item.Nsu === null && item.IdTipoTransacao === 1);
     }
 
-    static getPagamentosAPI(consultaAPI) {
-        return consultaAPI.filter(item => item.AdqId === 2 && item.Nsu !== null);
+    static redeAPIduplicado(consultaAPI) {
+        return consultaAPI.filter(item => item.AdqId === 2 && item.Nsu !== null && item.IdTipoTransacao === 1);
     }
     
     static tratarPagamentos(api_valores) {
@@ -150,9 +150,9 @@ app.post('/consultarduplicidade', async (req, res) => {
 
     try {
         const pagamentos = await apiClient.getPagamentos(data_inicial, data_final);
-        const pagamentosedi = await apiClient.getPagamentosEDI(pagamentos);
+        const pagamentosedi = await apiClient.redeEDIduplicado(pagamentos);
         const resultadosprimeiro = APIClient.tratarPagamentosedi(pagamentosedi);
-        const pagamentosapi = await apiClient.getPagamentosAPI(consultaAPI);
+        const pagamentosapi = await apiClient.redeAPIduplicado(consultaAPI);
         const resultadosduplicidade = APIClient.tratarPagamentosapi(pagamentosapi, resultadosprimeiro);
         res.render('index', { resultadosduplicidade, resultadosvalores: null });
     } catch (error) {
