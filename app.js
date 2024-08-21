@@ -110,7 +110,7 @@ class RedeApixEdi{
         return consultaAPI.value.filter(element => element.AdqId === 2 && element.Nsu !== null && element.IdTipoTransacao === 1);
     }
 
-    tratarPagamentosedi(api_valores) {
+    gerarlistaronulo(api_valores) {
         if (!api_valores) {
             console.log("Nenhum pagamento foi retornado ou ocorreu um erro na consulta.");
             return [];
@@ -164,9 +164,6 @@ app.post('/consulta', async (req, res) => {
 
     try {
         const pagamentos = await apiClient.getPagamentos(data_inicial, data_final);
-        //const pagamentosedi = redeapixedi.redeEDIduplicado(pagamentos);
-        //const resultadosprimeiro = redeapixedi.tratarPagamentosedi(pagamentosedi);
-        //const pagamentosapi = redeapixedi.redeAPIduplicado(pagamentos);
         const resultadosduplicidaderedeediapi = redeapixedi.tratarPagamentosapi(pagamentos);
         const resultadotratamento = casosidentificados.tratarPagamentos(pagamentos);
         const resultadosvalores = resultadosduplicidaderedeediapi.concat(resultadotratamento);
