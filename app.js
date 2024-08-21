@@ -113,7 +113,7 @@ class CasosIdentificados{
         .indexOf(item) !== index)
         .map(element => {
             return {
-                Id : element['Id'],
+                Id : "",
                 RefoID : element['RefoId'],
                 Empresa: element['Empresa'],
                 DataPagamento: element['DataPagamento'],
@@ -122,7 +122,7 @@ class CasosIdentificados{
                 Autorizacao: element['Autorizacao'],
                 ValorBruto: element['ValorBruto'],
                 ValorLiquido: element['ValorLiquido'],
-                Status: "Líquido>Bruto"
+                Status: "Registro Duplicado"
             };
         });
     }
