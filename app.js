@@ -70,7 +70,11 @@ class APIClient {
 
 class CasosIdentificados{
 
-    tratarPagamentos(api_valores) {
+    gerararraysemid(consultaAPI) {
+        return consultaAPI.value.map(({ Id, ...restante }) => restante);
+    }
+
+    liquidomaiorquebruto(api_valores) {
         if (!api_valores || !api_valores.value) {
             console.log("Nenhum pagamento foi retornado ou ocorreu um erro na consulta.");
             return [];
@@ -98,19 +102,50 @@ class CasosIdentificados{
             });
     }
 
+    listarduplicidades(api_valores) {
+        if (!api_valores) {
+            console.log("Nenhum pagamento foi retornado ou ocorreu um erro na consulta.");
+            return [];
+        }
+        const listasemid = this.gerararraysemid(api_valores);
+        return listasemid
+        .filter((item, index) => listasemid
+        .indexOf(item) !== index)
+        .map(element => {
+            return {
+                Id : element['Id'],
+                RefoID : element['RefoId'],
+                Empresa: element['Empresa'],
+                DataPagamento: element['DataPagamento'],
+                DataVenda: element['DataVenda'],
+                Nsu: element['Nsu'],
+                Autorizacao: element['Autorizacao'],
+                ValorBruto: element['ValorBruto'],
+                ValorLiquido: element['ValorLiquido'],
+                Status: "Líquido>Bruto"
+            };
+        });
+    }
+
+    todososcasos(api_valores){
+        const liquidomaiorquebruto = this.liquidomaiorquebruto(api_valores);
+        const duplicidades = this.listarduplicidades(api_valores);
+        return liquidomaiorquebruto.concat(duplicidades);
+    }
+
 }
 
 class RedeApixEdi{
 
-    redeEDIduplicado(consultaAPI) {
+    listarREDEsemNSU(consultaAPI) {
         return consultaAPI.value.filter(element => element.AdqId === 2 && element.Nsu === null && element.IdTipoTransacao === 1);
     }
 
-    redeAPIduplicado(consultaAPI) {
+    listarREDEcomNSU(consultaAPI) {
         return consultaAPI.value.filter(element => element.AdqId === 2 && element.Nsu !== null && element.IdTipoTransacao === 1);
     }
 
-    tratarPagamentosedi(api_valores) {
+    listarROsemNSU(api_valores) {
         if (!api_valores) {
             console.log("Nenhum pagamento foi retornado ou ocorreu um erro na consulta.");
             return [];
@@ -128,15 +163,15 @@ class RedeApixEdi{
         });
     }
 
-    tratarPagamentosapi(api_valores) {
+    duplicidadesapixedi(api_valores) {
         if (!api_valores) {
             console.log("Nenhum pagamento foi retornado ou ocorreu um erro na consulta.");
             return [];
         }
 
-        const pagamentosedi = this.redeEDIduplicado(api_valores);
-        const pagamentosapi = this.redeAPIduplicado(api_valores);
-        const listaronulo = this.tratarPagamentosedi(pagamentosedi);
+        const pagamentosedi = this.listarREDEsemNSU(api_valores);
+        const pagamentosapi = this.listarREDEcomNSU(api_valores);
+        const listaronulo = this.listarROsemNSU(pagamentosedi);
         return pagamentosapi
             .filter(element => listaronulo.includes(element['ResumoVenda']))
             .map(element => {
@@ -156,6 +191,7 @@ class RedeApixEdi{
     }
 }
 
+
 app.post('/consulta', async (req, res) => {
     const { data_inicial, data_final, chave_api } = req.body;
     const chaveApiTrimmed = chave_api ? chave_api.trim() : '';
@@ -165,8 +201,8 @@ app.post('/consulta', async (req, res) => {
 
     try {
         const pagamentos = await apiClient.getPagamentos(data_inicial, data_final);
-        const resultadosduplicidaderedeediapi = redeapixedi.tratarPagamentosapi(pagamentos);
-        const resultadotratamento = casosidentificados.tratarPagamentos(pagamentos);
+        const resultadosduplicidaderedeediapi = redeapixedi.duplicidadesapixedi(pagamentos);
+        const resultadotratamento = casosidentificados.todososcasos(pagamentos);
         const resultadosvalores = resultadosduplicidaderedeediapi.concat(resultadotratamento);
         res.render('index', { resultadosvalores});
     } catch (error) {
