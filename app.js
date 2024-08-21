@@ -110,7 +110,7 @@ class RedeApixEdi{
         return consultaAPI.value.filter(element => element.AdqId === 2 && element.Nsu !== null && element.IdTipoTransacao === 1);
     }
 
-    gerarlistaronulo(api_valores) {
+    tratarPagamentosedi(api_valores) {
         if (!api_valores) {
             console.log("Nenhum pagamento foi retornado ou ocorreu um erro na consulta.");
             return [];
@@ -133,9 +133,10 @@ class RedeApixEdi{
             console.log("Nenhum pagamento foi retornado ou ocorreu um erro na consulta.");
             return [];
         }
-        const pagamentosedi = redeEDIduplicado(api_valores);
-        const pagamentosapi = redeAPIduplicado(api_valores);
-        const listaronulo = tratarPagamentosedi(pagamentosedi);
+
+        const pagamentosedi = this.redeEDIduplicado(api_valores);
+        const pagamentosapi = this.redeAPIduplicado(api_valores);
+        const listaronulo = this.tratarPagamentosedi(pagamentosedi);
         return pagamentosapi
             .filter(element => listaronulo.includes(element['ResumoVenda']))
             .map(element => {
