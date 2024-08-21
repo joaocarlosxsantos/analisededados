@@ -25,42 +25,19 @@
                     <label for="chave_api">Chave API:</label>
                     <input type="text" id="chave_api" name="chave_api" required>
                 </div>
-                <button type="button" onclick="submitForm('consultarduplicidade')">Consultar Duplicidade</button>
-                <button type="button" onclick="submitForm('analisar')">Líquido > Bruto</button>
+                <button type="button" onclick="submitForm('consulta')">Realizar Consulta</button>
             </form>
         </div>
     </div>
 
     <div class="resultadosdasconsultas">
-        <% if (resultadosduplicidade) { %>
-            <h2>Registros API para exclusão</h2>
-            <button onclick="exportTableToCSV('duplicidades')">Exportar para CSV</button>
-            <table id="resultadosTableDuplicidades">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>REFO</th>
-                        <th>Data Pagamento</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% resultadosduplicidade.forEach(resultadoduplicidade => { %>
-                        <tr>
-                            <td><%= resultadoduplicidade.id %></td>
-                            <td><%= resultadoduplicidade.refo %></td>
-                            <td><%= resultadoduplicidade.datapagto %></td>
-                        </tr>
-                    <% }); %>
-                </tbody>
-            </table>
-        <% } %>
-
         <% if (resultadosvalores) { %>
             <h2>Resultados</h2>
             <button onclick="exportTableToCSV('valores')">Exportar para CSV</button>
             <table id="resultadosTableValores">
                 <thead>
                     <tr>
+                        <th>Id do registro</th>
                         <th>RefoID</th>
                         <th>Empresa</th>
                         <th>Data Pagamento</th>
@@ -75,6 +52,7 @@
                 <tbody>
                     <% resultadosvalores.forEach(resultadovalores => { %>
                         <tr>
+                            <td><%= resultadovalores.Id %></td>
                             <td><%= resultadovalores.RefoID %></td>
                             <td><%= resultadovalores.Empresa %></td>
                             <td><%= resultadovalores.DataPagamento %></td>

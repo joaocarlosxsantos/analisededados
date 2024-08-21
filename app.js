@@ -23,7 +23,7 @@ app.use((req, res, next) => {
 
 // Rota principal
 app.get('/', (req, res) => {
-    res.render('index', { resultadosvalores: null, resultadosduplicidade: null });
+    res.render('index', { resultadosvalores: null});
 });
 
 class APIClient {
@@ -44,7 +44,6 @@ class APIClient {
             } else {
                 console.error(`Erro: ${error.message}`);
                 if (error.response) {
-                    // Se a resposta da API estiver disponível
                     console.error(`Status: ${error.response.status}`);
                     console.error(`Dados: ${JSON.stringify(error.response.data)}`);
                 }
@@ -56,7 +55,7 @@ class APIClient {
     async getPagamentos(data_inicial, data_final) {
         const params = {
             $filter: `DataPagamento ge ${data_inicial}T00:00:00-03:00 and DataPagamento le ${data_final}T23:59:59-03:00`,
-            $select: 'AdqId,RefoId,Empresa,DataPagamento,DataVenda,Nsu,Autorizacao,ResumoVenda,ValorBruto,ValorLiquido,IdTipoTransacao'
+            $select: 'AdqId,Id,RefoId,Empresa,DataPagamento,DataVenda,Nsu,Autorizacao,ResumoVenda,ValorBruto,ValorLiquido,IdTipoTransacao'
         };
 
         try {
@@ -67,16 +66,11 @@ class APIClient {
             throw error;
         }
     }
+}
 
-    static redeEDIduplicado(consultaAPI) {
-        return consultaAPI.filter(item => item.AdqId === 2 && item.Nsu === null && item.IdTipoTransacao === 1);
-    }
+class CasosIdentificados{
 
-    static redeAPIduplicado(consultaAPI) {
-        return consultaAPI.filter(item => item.AdqId === 2 && item.Nsu !== null && item.IdTipoTransacao === 1);
-    }
-    
-    static tratarPagamentos(api_valores) {
+    tratarPagamentos(api_valores) {
         if (!api_valores || !api_valores.value) {
             console.log("Nenhum pagamento foi retornado ou ocorreu um erro na consulta.");
             return [];
@@ -89,31 +83,40 @@ class APIClient {
                 return valorb < valorl && valorb > 0;
             })
             .map(element => {
-                const valorb = element['ValorBruto'];
-                const valorl = element['ValorLiquido'];
-                let status = "Líquido>Bruto";
-                
                 return {
+                    Id : element['Id'],
                     RefoID : element['RefoId'],
                     Empresa: element['Empresa'],
                     DataPagamento: element['DataPagamento'],
                     DataVenda: element['DataVenda'],
                     Nsu: element['Nsu'],
                     Autorizacao: element['Autorizacao'],
-                    ValorBruto: valorb,
-                    ValorLiquido: valorl,
-                    Status: status
+                    ValorBruto: element['ValorBruto'],
+                    ValorLiquido: element['ValorLiquido'],
+                    Status: "Líquido>Bruto"
                 };
             });
     }
 
-    static tratarPagamentosedi(api_valores) {
-        if (!api_valores || !api_valores.value) {
+}
+
+class RedeApixEdi{
+
+    redeEDIduplicado(consultaAPI) {
+        return consultaAPI.value.filter(element => element.AdqId === 2 && element.Nsu === null && element.IdTipoTransacao === 1);
+    }
+
+    redeAPIduplicado(consultaAPI) {
+        return consultaAPI.value.filter(element => element.AdqId === 2 && element.Nsu !== null && element.IdTipoTransacao === 1);
+    }
+
+    tratarPagamentosedi(api_valores) {
+        if (!api_valores) {
             console.log("Nenhum pagamento foi retornado ou ocorreu um erro na consulta.");
             return [];
         }
 
-        return api_valores.value.map(element => {
+        return api_valores.map(element => {
             const nsu = element['Nsu'];
             const resumovenda = element['ResumoVenda'];
             const idtipotransacao = element['IdTipoTransacao'];
@@ -125,60 +128,54 @@ class APIClient {
         });
     }
 
-    static tratarPagamentosapi(api_valores, listaronulo) {
-        if (!api_valores || !api_valores.value) {
+    tratarPagamentosapi(api_valores) {
+        if (!api_valores) {
             console.log("Nenhum pagamento foi retornado ou ocorreu um erro na consulta.");
             return [];
         }
-
-        return api_valores.value
+        const pagamentosedi = redeEDIduplicado(api_valores);
+        const pagamentosapi = redeAPIduplicado(api_valores);
+        const listaronulo = tratarPagamentosedi(pagamentosedi);
+        return pagamentosapi
             .filter(element => listaronulo.includes(element['ResumoVenda']))
             .map(element => {
                 return {
-                    id: element['Id'],
-                    refo: element['RefoId'],
-                    datapagto: element['DataPagamento']
+                    Id : element['Id'],
+                    RefoID : element['RefoId'],
+                    Empresa: element['Empresa'],
+                    DataPagamento: element['DataPagamento'],
+                    DataVenda: element['DataVenda'],
+                    Nsu: element['Nsu'],
+                    Autorizacao: element['Autorizacao'],
+                    ValorBruto: element['ValorBruto'],
+                    ValorLiquido: element['ValorLiquido'],
+                    Status: "Registro API duplicado"
                 };
             });
     }
 }
 
-app.post('/consultarduplicidade', async (req, res) => {
+app.post('/consulta', async (req, res) => {
     const { data_inicial, data_final, chave_api } = req.body;
     const chaveApiTrimmed = chave_api ? chave_api.trim() : '';
     const apiClient = new APIClient('https://api.conciliadora.com.br/api', { 'Authorization': chaveApiTrimmed });
+    const redeapixedi = new RedeApixEdi();
+    const casosidentificados = new CasosIdentificados();
 
     try {
         const pagamentos = await apiClient.getPagamentos(data_inicial, data_final);
-        const pagamentosedi = await apiClient.redeEDIduplicado(pagamentos);
-        const resultadosprimeiro = APIClient.tratarPagamentosedi(pagamentosedi);
-        const pagamentosapi = await apiClient.redeAPIduplicado(consultaAPI);
-        const resultadosduplicidade = APIClient.tratarPagamentosapi(pagamentosapi, resultadosprimeiro);
-        res.render('index', { resultadosduplicidade, resultadosvalores: null });
+        //const pagamentosedi = redeapixedi.redeEDIduplicado(pagamentos);
+        //const resultadosprimeiro = redeapixedi.tratarPagamentosedi(pagamentosedi);
+        //const pagamentosapi = redeapixedi.redeAPIduplicado(pagamentos);
+        const resultadosduplicidaderedeediapi = redeapixedi.tratarPagamentosapi(pagamentos);
+        const resultadotratamento = casosidentificados.tratarPagamentos(pagamentos);
+        const resultadosvalores = resultadosduplicidaderedeediapi.concat(resultadotratamento);
+        res.render('index', { resultadosvalores});
     } catch (error) {
         if (req.timedout) {
             res.status(503).send('O servidor está demorando muito para responder. Tente novamente mais tarde.');
         } else {
-            res.render('index', { resultadosduplicidade: [], resultadosvalores: null });
-            console.log("erro", error.message);
-        }
-    }
-});
-
-app.post('/analisar', async (req, res) => {
-    const { data_inicial, data_final, chave_api } = req.body;
-    const chaveApiTrimmed = chave_api ? chave_api.trim() : '';
-    const apiClient = new APIClient('https://api.conciliadora.com.br/api', { 'Authorization': chaveApiTrimmed });
-
-    try {
-        const pagamentos = await apiClient.getPagamentos(data_inicial, data_final);
-        const resultadosvalores = APIClient.tratarPagamentos(pagamentos);
-        res.render('index', { resultadosvalores, resultadosduplicidade: null });
-    } catch (error) {
-        if (req.timedout) {
-            res.status(503).send('O servidor está demorando muito para responder. Tente novamente mais tarde.');
-        } else {
-            res.render('index', { resultadosvalores: [], resultadosduplicidade: null });
+            res.render('index', { resultadosvalores: []});
             console.log("erro", error.message);
         }
     }
