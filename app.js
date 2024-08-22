@@ -2,26 +2,20 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const path = require('path');
-const timeout = require('connect-timeout'); // Adicionar o pacote de timeout
-
+const timeout = require('connect-timeout'); 
 const app = express();
 const port = 3000;
 
-// Configurar o EJS como motor de templates
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
-// Middleware para servir arquivos estáticos e processar o corpo das requisições
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(timeout('500s')); // Define um timeout de 120 segundos
+app.use(timeout('500s'));
 
-// Middleware para tratar requisições que ultrapassaram o tempo limite
 app.use((req, res, next) => {
     if (!req.timedout) next();
 });
 
-// Rota principal
 app.get('/', (req, res) => {
     res.render('index', { resultadosvalores: null});
 });
@@ -55,7 +49,7 @@ class APIClient {
     async getPagamentos(data_inicial, data_final) {
         const params = {
             $filter: `DataPagamento ge ${data_inicial}T00:00:00-03:00 and DataPagamento le ${data_final}T23:59:59-03:00`,
-            $select: 'AdqId,Id,RefoId,Empresa,DataPagamento,DataVenda,Nsu,Autorizacao,ResumoVenda,ValorBruto,ValorLiquido,IdTipoTransacao'
+            $select: 'AdqId,Adquirente,Id,RefoId,Empresa,DataPagamento,DataVenda,Nsu,Autorizacao,ResumoVenda,ValorBruto,ValorLiquido,IdTipoTransacao'
         };
 
         try {
@@ -90,6 +84,7 @@ class CasosIdentificados{
                 return {
                     Id : element['Id'],
                     RefoID : element['RefoId'],
+                    Adquirente : element['Adquirente'],
                     Empresa: element['Empresa'],
                     DataPagamento: element['DataPagamento'],
                     DataVenda: element['DataVenda'],
@@ -107,14 +102,29 @@ class CasosIdentificados{
             console.log("Nenhum pagamento foi retornado ou ocorreu um erro na consulta.");
             return [];
         }
-        const listasemid = this.gerararraysemid(api_valores);
-        return listasemid
-        .filter((item, index) => listasemid
-        .indexOf(item) !== index)
+        //const listasemid = this.gerararraysemid(api_valores);
+        let statusregistro = ""
+        return api_valores.value
+        .filter((item, index, self) => self.findIndex(t => (
+            t.RefoId === item.RefoId && 
+            t.Empresa === item.Empresa && 
+            t.DataPagamento === item.DataPagamento && 
+            t.DataVenda === item.DataVenda && 
+            t.Nsu === item.Nsu && 
+            t.Autorizacao === item.Autorizacao &&
+            t.ValorBruto === item.ValorBruto &&
+            t.ValorLiquido === item.ValorLiquido
+        )) !== index)
         .map(element => {
+            if(element['ValorLiquido']<0){
+                statusregistro = "Débito Duplicado";
+            }else{
+                statusregistro = "Registro Duplicado";
+            }
             return {
-                Id : "",
-                RefoID : element['RefoId'],
+                Id: element['Id'],
+                RefoID: element['RefoId'],
+                Adquirente : element['Adquirente'],
                 Empresa: element['Empresa'],
                 DataPagamento: element['DataPagamento'],
                 DataVenda: element['DataVenda'],
@@ -122,7 +132,7 @@ class CasosIdentificados{
                 Autorizacao: element['Autorizacao'],
                 ValorBruto: element['ValorBruto'],
                 ValorLiquido: element['ValorLiquido'],
-                Status: "Registro Duplicado"
+                Status: statusregistro
             };
         });
     }
@@ -178,6 +188,7 @@ class RedeApixEdi{
                 return {
                     Id : element['Id'],
                     RefoID : element['RefoId'],
+                    Adquirente : element['Adquirente'],
                     Empresa: element['Empresa'],
                     DataPagamento: element['DataPagamento'],
                     DataVenda: element['DataVenda'],
@@ -190,7 +201,6 @@ class RedeApixEdi{
             });
     }
 }
-
 
 app.post('/consulta', async (req, res) => {
     const { data_inicial, data_final, chave_api } = req.body;
