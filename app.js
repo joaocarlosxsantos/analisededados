@@ -102,9 +102,13 @@ class CasosIdentificados{
             console.log("Nenhum pagamento foi retornado ou ocorreu um erro na consulta.");
             return [];
         }
-        //const listasemid = this.gerararraysemid(api_valores);
-        let statusregistro = ""
-        return api_valores.value
+        return api_valores.value.filter(element => {
+            const valorb = parseFloat(element['ValorBruto']);
+            const valorl = parseFloat(element['ValorLiquido']);
+            if(valorb > 0 && valorl > 0){
+                return
+            }
+        })
         .filter((item, index, self) => self.findIndex(t => (
             t.RefoId === item.RefoId && 
             t.Empresa === item.Empresa && 
@@ -113,14 +117,10 @@ class CasosIdentificados{
             t.Nsu === item.Nsu && 
             t.Autorizacao === item.Autorizacao &&
             t.ValorBruto === item.ValorBruto &&
-            t.ValorLiquido === item.ValorLiquido
+            t.ValorLiquido === item.ValorLiquido &&
+            t.IdTipoTransacao === item.IdTipoTransacao
         )) !== index)
         .map(element => {
-            if(element['ValorLiquido']<0){
-                statusregistro = "Débito Duplicado";
-            }else{
-                statusregistro = "Registro Duplicado";
-            }
             return {
                 Id: element['Id'],
                 RefoID: element['RefoId'],
@@ -132,7 +132,7 @@ class CasosIdentificados{
                 Autorizacao: element['Autorizacao'],
                 ValorBruto: element['ValorBruto'],
                 ValorLiquido: element['ValorLiquido'],
-                Status: statusregistro
+                Status: "Registro Duplicado"
             };
         });
     }
@@ -165,9 +165,10 @@ class RedeApixEdi{
             const nsu = element['Nsu'];
             const resumovenda = element['ResumoVenda'];
             const idtipotransacao = element['IdTipoTransacao'];
+            const datapagamento = element['DataPagamento'];
 
             if (nsu === null && idtipotransacao === 1) {
-                return resumovenda;
+                return resumovenda,datapagamento;
             }
             
         });
@@ -183,7 +184,7 @@ class RedeApixEdi{
         const pagamentosapi = this.listarREDEcomNSU(api_valores);
         const listaronulo = this.listarROsemNSU(pagamentosedi);
         return pagamentosapi
-            .filter(element => listaronulo.includes(element['ResumoVenda']))
+            .filter(element => listaronulo.includes(element['ResumoVenda'],element['DataPagamento']))
             .map(element => {
                 return {
                     Id : element['Id'],
